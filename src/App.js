@@ -53,10 +53,12 @@ class App extends Component {
     const { link, searchTerm } = this.state;
 
     return (
-      <div className="App">
-        <Search value={searchTerm} onChange={this.onSearchChange}>
-          Search{" "}
-        </Search>
+      <div className="page">
+        <div className="interactions">
+          <Search value={searchTerm} onChange={this.onSearchChange}>
+            Search{" "}
+          </Search>
+        </div>
         <Table link={link} pattern={searchTerm} onDismiss={this.onDismiss} />
       </div>
     );
@@ -113,18 +115,23 @@ class Table extends Component {
 function Table({ link, pattern, onDismiss }) {
   //const { link, pattern, onDismiss } = this.props;
   return (
-    <div>
+    <div className="table">
       {link.filter(isSearched(pattern)).map(item => (
-        <div key={item.objectID}>
+        <div key={item.objectID} className="table-row">
           <li>
-            <span>
+            <span style={{ width: "40%" }}>
               <a href={item.url}>{item.title}</a>
             </span>
-            <span>{item.author}</span>
-            <span>{item.num_comments}</span>
-            <span>{item.num_comments}</span>
-            <span>
-              <Button onClick={() => onDismiss(item.objectID)}>Dismiss</Button>
+            <span style={{ width: "30%" }}>{item.author}</span>
+            <span style={{ width: "10%" }}>{item.num_comments}</span>
+            <span style={{ width: "10%" }}>{item.num_comments}</span>
+            <span style={{ width: "10%" }}>
+              <Button
+                className="button-inline"
+                onClick={() => onDismiss(item.objectID)}
+              >
+                Dismiss
+              </Button>
             </span>
           </li>
         </div>
