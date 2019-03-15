@@ -62,7 +62,7 @@ class App extends Component {
     );
   }
 }
-
+/*
 class Search extends Component {
   render() {
     const { value, onChange, children } = this.props;
@@ -73,8 +73,16 @@ class Search extends Component {
       </form>
     );
   }
-}
+  }
+*/
+const Search = ({ value, onChange, children }) => (
+  <form>
+    {children}
+    <input type="text" onChange={onChange} value={value} />
+  </form>
+);
 
+/*
 class Table extends Component {
   render() {
     const { link, pattern, onDismiss } = this.props;
@@ -90,10 +98,7 @@ class Table extends Component {
               <span>{item.num_comments}</span>
               <span>{item.num_comments}</span>
               <span>
-                <Button
-                  className={"a:col"}
-                  onClick={() => onDismiss(item.objectID)}
-                >
+                <Button onClick={() => onDismiss(item.objectID)}>
                   Dismiss
                 </Button>
               </span>
@@ -104,10 +109,33 @@ class Table extends Component {
     );
   }
 }
-
+*/
+function Table({ link, pattern, onDismiss }) {
+  //const { link, pattern, onDismiss } = this.props;
+  return (
+    <div>
+      {link.filter(isSearched(pattern)).map(item => (
+        <div key={item.objectID}>
+          <li>
+            <span>
+              <a href={item.url}>{item.title}</a>
+            </span>
+            <span>{item.author}</span>
+            <span>{item.num_comments}</span>
+            <span>{item.num_comments}</span>
+            <span>
+              <Button onClick={() => onDismiss(item.objectID)}>Dismiss</Button>
+            </span>
+          </li>
+        </div>
+      ))}
+    </div>
+  );
+}
+/*
 class Button extends Component {
   render() {
-    const { onClick, className, children } = this.props;
+    const { onClick, className = "", children } = this.props;
     return (
       <button onClick={onClick} className={className} type="button">
         {children}
@@ -115,4 +143,12 @@ class Button extends Component {
     );
   }
 }
+*/
+
+const Button = ({ onClick, className = "", children }) => (
+  <button onClick={onClick} className={className} type="button">
+    {children}
+  </button>
+);
+
 export default App;
