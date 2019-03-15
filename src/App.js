@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import "./App.css";
-import Clock from "./Clock";
 
 const link = [
   {
@@ -51,12 +50,14 @@ class App extends Component {
   }
 
   render() {
+    const { link, searchTerm } = this.state;
+
     return (
       <div className="App">
         <form>
           <input type="text" onChange={this.onSearchChange} />
         </form>
-        {this.state.link.filter(isSearched(this.state.searchTerm)).map(item => (
+        {link.filter(isSearched(searchTerm)).map(item => (
           <div key={item.objectID}>
             <li>
               <span>
@@ -76,7 +77,6 @@ class App extends Component {
             </li>
           </div>
         ))}
-        <Clock />
       </div>
     );
   }
