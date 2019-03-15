@@ -44,6 +44,14 @@ class App extends Component {
               <span>{item.author}</span>
               <span>{item.num_comments}</span>
               <span>{item.num_comments}</span>
+              <span>
+                <button
+                  type="button"
+                  onClick={() => this.onDismiss(item.objectID)}
+                >
+                  Dismiss
+                </button>
+              </span>
             </li>
           </div>
         ))}
