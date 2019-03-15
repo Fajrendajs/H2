@@ -30,6 +30,17 @@ class App extends Component {
     this.state = {
       link
     };
+
+    this.onDismiss = this.onDismiss.bind(this);
+  }
+
+  onDismiss(id) {
+    const isNotId = item => item.objectID !== id;
+
+    const updatedList = this.state.link.filter(item => item.objectID !== id);
+    this.setState({
+      link: updatedList
+    });
   }
 
   render() {
