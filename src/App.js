@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./App.css";
-import NumberList from "./NumberList";
+import Clock from "./Clock";
 
 const link = [
   {
@@ -23,30 +23,40 @@ const link = [
 
 const numbers = [1, 2, 3, 4, 5];
 
+const isSearched = searchTerm => item =>
+  item.title.toLowerCase().includes(searchTerm.toLowerCase());
+
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      link
+      link,
+      searchTerm: ""
     };
 
     this.onDismiss = this.onDismiss.bind(this);
+    this.onSearchChange = this.onSearchChange.bind(this);
   }
 
   onDismiss(id) {
-    const isNotId = item => item.objectID !== id;
-
     const updatedList = this.state.link.filter(item => item.objectID !== id);
     this.setState({
       link: updatedList
     });
   }
 
+  onSearchChange(event) {
+    this.setState({ searchTerm: event.target.value });
+  }
+
   render() {
     return (
       <div className="App">
-        {this.state.link.map(item => (
+        <form>
+          <input type="text" onChange={this.onSearchChange} />
+        </form>
+        {this.state.link.filter(isSearched(this.state.searchTerm)).map(item => (
           <div key={item.objectID}>
             <li>
               <span>
@@ -66,7 +76,7 @@ class App extends Component {
             </li>
           </div>
         ))}
-        <NumberList numbers={numbers} />
+        <Clock />
       </div>
     );
   }
