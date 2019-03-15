@@ -54,14 +54,30 @@ class App extends Component {
 
     return (
       <div className="App">
-        <form>
-          <input
-            type="text"
-            onChange={this.onSearchChange}
-            value={searchTerm}
-          />
-        </form>
-        {link.filter(isSearched(searchTerm)).map(item => (
+        <Search value={searchTerm} onChange={this.onSearchChange} />
+        <Table link={link} pattern={searchTerm} onDismiss={this.onDismiss} />
+      </div>
+    );
+  }
+}
+
+class Search extends Component {
+  render() {
+    const { value, onChange } = this.props;
+    return (
+      <form>
+        <input type="text" onChange={onChange} value={value} />
+      </form>
+    );
+  }
+}
+
+class Table extends Component {
+  render() {
+    const { link, pattern, onDismiss } = this.props;
+    return (
+      <div>
+        {link.filter(isSearched(pattern)).map(item => (
           <div key={item.objectID}>
             <li>
               <span>
@@ -71,10 +87,7 @@ class App extends Component {
               <span>{item.num_comments}</span>
               <span>{item.num_comments}</span>
               <span>
-                <button
-                  type="button"
-                  onClick={() => this.onDismiss(item.objectID)}
-                >
+                <button type="button" onClick={() => onDismiss(item.objectID)}>
                   Dismiss
                 </button>
               </span>
