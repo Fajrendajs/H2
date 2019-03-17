@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
+import ToDo from './ToDo';
 
 const link = [
   {
@@ -58,6 +59,7 @@ class App extends Component {
           </Search>
         </div>
         <Table link={link} pattern={searchTerm} onDismiss={this.onDismiss} />
+        <ToDo />
       </div>
     );
   }
