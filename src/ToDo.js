@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Input, List, Icon, DatePicker } from 'antd';
+import moment from 'moment';
 
 // Don't forget to include the CSS styles for antd!
 import 'antd/dist/antd.css';
@@ -104,9 +105,10 @@ class TodoItem extends Component {
       <List.Item
         actions={[
           <DatePicker
-            format="DD/MM/YYYY"
+            defaultValue={moment(new Date(), 'YYYY-MM-DD')}
+            format="YYYY-MM-DD"
             onChange={this.handleDateChange}
-            value={this.props.todo.date}
+            //  value={this.props.todo.date}
           />,
           <Icon type="close-circle" theme="filled" onClick={this.remove} />
         ]}
