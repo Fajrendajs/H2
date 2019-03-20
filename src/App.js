@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
 import ToDo from './ToDo';
-import TodoMUI from './TodoMUI';
 
 const link = [
   {
@@ -60,7 +59,7 @@ class App extends Component {
           </Search>
         </div>
         <Table link={link} pattern={searchTerm} onDismiss={this.onDismiss} />
-        <TodoMUI />
+
         <ToDo />
       </div>
     );
