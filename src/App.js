@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
 import ToDo from './ToDo';
+import Blueprint from './Blueprint';
+import Todoblueprint from './Todoblueprint';
 
 const link = [
   {
@@ -61,6 +63,10 @@ class App extends Component {
         <Table link={link} pattern={searchTerm} onDismiss={this.onDismiss} />
 
         <ToDo />
+        <div>=====================================================</div>
+        <Todoblueprint />
+        <div>=====================================================</div>
+        <Blueprint />
       </div>
     );
   }
