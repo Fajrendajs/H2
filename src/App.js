@@ -1,27 +1,13 @@
 import React, { Component } from 'react';
 import './App.css';
 import ToDo from './ToDo';
-import Blueprint from './Blueprint';
-import Todoblueprint from './Todoblueprint';
+import ProfilePage from './ProfilePage';
+import { Button } from 'antd';
 
-const link = [
-  {
-    title: 'React',
-    url: 'https://facebook.github.io/react/',
-    author: 'Jordan Walke',
-    num_comments: 3,
-    points: 4,
-    objectID: 0
-  },
-  {
-    title: 'Redux',
-    url: 'https://github.com/reactjs/redux',
-    author: 'Dan Abramov, Andrew Clarke',
-    num_comments: 2,
-    points: 5,
-    objectID: 1
-  }
-];
+const DEFAULT_QUERY = 'redux';
+const PATH_BASE = 'https://hn.algolia.com/api/v1';
+const PATH_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
 
 const isSearched = searchTerm => item =>
   item.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -31,8 +17,8 @@ class App extends Component {
     super(props);
 
     this.state = {
-      link,
-      searchTerm: ''
+      result: null,
+      searchTerm: DEFAULT_QUERY
     };
 
     this.onDismiss = this.onDismiss.bind(this);
@@ -40,9 +26,9 @@ class App extends Component {
   }
 
   onDismiss(id) {
-    const updatedList = this.state.link.filter(item => item.objectID !== id);
+    const updatedList = this.state.result.filter(item => item.objectID !== id);
     this.setState({
-      link: updatedList
+      result: updatedList
     });
   }
 
@@ -50,8 +36,24 @@ class App extends Component {
     this.setState({ searchTerm: event.target.value });
   }
 
+  setSearchTopStories(result) {
+    console.log('did setSearchTopStories');
+    this.setState({ result });
+    console.log(this.state.result);
+  }
+
+  componentDidMount() {
+    const { searchTerm } = this.state;
+    console.log('did mount');
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+      .then(response => response.json())
+      .then(result => this.setSearchTopStories(result))
+      .catch(error => console.log('greska'));
+  }
   render() {
-    const { link, searchTerm } = this.state;
+    const { result, searchTerm } = this.state;
+
+    if (!result) return null;
 
     return (
       <div className="page">
@@ -60,13 +62,13 @@ class App extends Component {
             Search{' '}
           </Search>
         </div>
-        <Table link={link} pattern={searchTerm} onDismiss={this.onDismiss} />
-
+        <Table
+          result={result.hits}
+          pattern={searchTerm}
+          onDismiss={this.onDismiss}
+        />
         <ToDo />
-        <div>=====================================================</div>
-        <Todoblueprint />
-        <div>=====================================================</div>
-        <Blueprint />
+        <ProfilePage user="test" />
       </div>
     );
   }
@@ -79,11 +81,11 @@ const Search = ({ value, onChange, children }) => (
   </form>
 );
 
-function Table({ link, pattern, onDismiss }) {
+function Table({ result, pattern, onDismiss }) {
   //const { link, pattern, onDismiss } = this.props;
   return (
     <div className="table">
-      {link.filter(isSearched(pattern)).map(item => (
+      {result.filter(isSearched(pattern)).map(item => (
         <div key={item.objectID} className="table-row">
           <li>
             <span style={{ width: '40%' }}>
@@ -94,6 +96,8 @@ function Table({ link, pattern, onDismiss }) {
             <span style={{ width: '10%' }}>{item.num_comments}</span>
             <span style={{ width: '10%' }}>
               <Button
+                type="primary"
+                value="small"
                 className="button-inline"
                 onClick={() => onDismiss(item.objectID)}
               >
@@ -107,7 +111,7 @@ function Table({ link, pattern, onDismiss }) {
   );
 }
 
-const Button = ({ onClick, className = '', children }) => (
+const IButton = ({ onClick, className = '', children }) => (
   <button onClick={onClick} className={className} type="button">
     {children}
   </button>
