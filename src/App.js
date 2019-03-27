@@ -8,28 +8,34 @@ const DEFAULT_QUERY = 'redux';
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
-
-const isSearched = searchTerm => item =>
-  item.title.toLowerCase().includes(searchTerm.toLowerCase());
+const PARAM_PAGE = 'page=';
 
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      result: null,
+      results: null,
+      searchKey: '',
       searchTerm: DEFAULT_QUERY
     };
-
+    this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
+    this.onSearchSubmit = this.onSearchSubmit.bind(this);
   }
 
   onDismiss(id) {
+    const { searchKey, results } = this.state;
+    const { hits, page } = results[searchKey];
     const isNotId = item => item.objectID !== id;
-    const updatedHits = this.state.result.hits.filter(isNotId);
+    const updatedHits = hits.filter(isNotId);
+
     this.setState({
-      result: { ...this.state.result, hits: updatedHits }
+      results: {
+        ...results,
+        [searchKey]: { hits: updatedHits, page }
+      }
     });
     /*
     const updatedList = this.state.result.filter(item => item.objectID !== id);
@@ -39,43 +45,93 @@ class App extends Component {
     */
   }
 
+  onSearchSubmit(event) {
+    const { searchTerm } = this.state;
+    this.setState({ searchKey: searchTerm });
+    this.fetchSearchTopStories(searchTerm);
+    event.preventDefault();
+  }
+
+  fetchSearchTopStories(searchTerm, page = 0) {
+    fetch(
+      `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}`
+    )
+      .then(response => response.json())
+      .then(result => this.setSearchTopStories(result))
+      .catch(error => console.log('greska'));
+  }
+
   onSearchChange(event) {
     this.setState({ searchTerm: event.target.value });
   }
 
   setSearchTopStories(result) {
+    /*
     console.log('did setSearchTopStories');
     this.setState({ result });
     console.log(this.state.result);
+*/
+
+    const { hits, page } = result;
+    const { searchKey, results } = this.setState;
+
+    const oldHits =
+      results && results[searchKey] ? results[searchKey].hits : [];
+
+    const updatedHits = [...oldHits, ...hits];
+    console.log('hits: ', hits);
+    console.log('oldHits: ', oldHits);
+    console.log('updated hits: ', updatedHits);
+    this.setState({
+      results: {
+        ...results,
+        hits: updatedHits,
+        page
+      }
+    });
+    console.log('this.state.results: ', this.state.results);
   }
 
   componentDidMount() {
     const { searchTerm } = this.state;
+    this.setState({ searchKey: searchTerm });
     console.log('did mount');
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
-      .then(response => response.json())
-      .then(result => this.setSearchTopStories(result))
-      .catch(error => console.log('greska'));
+    this.fetchSearchTopStories(searchTerm);
   }
   render() {
-    const { result, searchTerm } = this.state;
+    const { searchTerm, results, searchKey } = this.state;
+    const page =
+      (results && results[searchKey] && results[searchKey].page) || 0;
+    const list =
+      (results && results[searchKey] && results[searchKey].hits) || [];
 
-    if (!result) return null;
+      console.log('list: ', list);
+      console.log('page: ', page);
+
+
+    if (!results) return null;
 
     return (
       <div className="page">
         <div className="interactions">
-          <Search value={searchTerm} onChange={this.onSearchChange}>
+          <Search
+            value={searchTerm}
+            onSubmit={this.onSearchSubmit}
+            onChange={this.onSearchChange}
+          >
             Search{' '}
           </Search>
         </div>
-        {result && (
-          <Table
-            result={result.hits}
-            pattern={searchTerm}
-            onDismiss={this.onDismiss}
-          />
-        )}
+        <Table list={list} onDismiss={this.onDismiss} />
+        <div className="interactions">
+          <Button
+            style={{ backgroundColor: '#52c41a', color: 'white' }}
+            onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}
+          >
+            {' '}
+            More
+          </Button>
+        </div>
         <ToDo />
         <ProfilePage user="test" />
       </div>
@@ -83,18 +139,18 @@ class App extends Component {
   }
 }
 
-const Search = ({ value, onChange, children }) => (
-  <form>
-    {children}
+const Search = ({ value, onChange, onSubmit, children }) => (
+  <form onSubmit={onSubmit}>
     <input type="text" onChange={onChange} value={value} />
+    <button>{children}</button>
   </form>
 );
 
-function Table({ result, pattern, onDismiss }) {
+function Table({ list, onDismiss }) {
   //const { link, pattern, onDismiss } = this.props;
   return (
     <div className="table">
-      {result.filter(isSearched(pattern)).map(item => (
+      {list.map(item => (
         <div key={item.objectID} className="table-row">
           <li>
             <span style={{ width: '40%' }}>
