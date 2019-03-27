@@ -19,10 +19,16 @@ class App extends Component {
       searchKey: '',
       searchTerm: DEFAULT_QUERY
     };
+    this.setSearchTopStories = this.setSearchTopStories.bind(this);
+    this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
     this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
+  }
+
+  needsToSearchTopStories(searchTerm) {
+    return !this.state.results[searchTerm];
   }
 
   onDismiss(id) {
@@ -48,7 +54,10 @@ class App extends Component {
   onSearchSubmit(event) {
     const { searchTerm } = this.state;
     this.setState({ searchKey: searchTerm });
-    this.fetchSearchTopStories(searchTerm);
+    if (this.needsToSearchTopStories(searchTerm)) {
+      this.fetchSearchTopStories(searchTerm);
+    }
+    //this.fetchSearchTopStories(searchTerm);
     event.preventDefault();
   }
 
@@ -73,11 +82,9 @@ class App extends Component {
 */
 
     const { hits, page } = result;
-    const { searchKey, results } = this.setState;
-
+    const { searchKey, results } = this.state;
     const oldHits =
       results && results[searchKey] ? results[searchKey].hits : [];
-
     const updatedHits = [...oldHits, ...hits];
     console.log('hits: ', hits);
     console.log('oldHits: ', oldHits);
@@ -85,8 +92,7 @@ class App extends Component {
     this.setState({
       results: {
         ...results,
-        hits: updatedHits,
-        page
+        [searchKey]: { hits: updatedHits, page }
       }
     });
     console.log('this.state.results: ', this.state.results);
@@ -104,12 +110,10 @@ class App extends Component {
       (results && results[searchKey] && results[searchKey].page) || 0;
     const list =
       (results && results[searchKey] && results[searchKey].hits) || [];
+    console.log('list: ', list);
+    console.log('page: ', page);
 
-      console.log('list: ', list);
-      console.log('page: ', page);
-
-
-    if (!results) return null;
+    //if (!results) return null;
 
     return (
       <div className="page">
