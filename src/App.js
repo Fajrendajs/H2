@@ -3,21 +3,25 @@ import './App.css';
 import ToDo from './ToDo';
 import ProfilePage from './ProfilePage';
 import { Button } from 'antd';
+import axios from 'axios';
 
-const DEFAULT_QUERY = 'redux';
+const DEFAULT_QUERY = 'betting';
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
 const PARAM_PAGE = 'page=';
 
 class App extends Component {
+  _isMounted = false;
+
   constructor(props) {
     super(props);
 
     this.state = {
       results: null,
       searchKey: '',
-      searchTerm: DEFAULT_QUERY
+      searchTerm: DEFAULT_QUERY,
+      error: null
     };
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
@@ -62,12 +66,19 @@ class App extends Component {
   }
 
   fetchSearchTopStories(searchTerm, page = 0) {
+    /*
     fetch(
       `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}`
     )
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
-      .catch(error => console.log('greska'));
+      .catch(error => this.setState({ error }));
+    */
+    axios(
+      `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}`
+    )
+      .then(result => this._isMounted && this.setSearchTopStories(result))
+      .catch(error => this._isMounted && this.setState({ error }));
   }
 
   onSearchChange(event) {
@@ -75,45 +86,42 @@ class App extends Component {
   }
 
   setSearchTopStories(result) {
-    /*
-    console.log('did setSearchTopStories');
-    this.setState({ result });
-    console.log(this.state.result);
-*/
-
     const { hits, page } = result;
     const { searchKey, results } = this.state;
     const oldHits =
       results && results[searchKey] ? results[searchKey].hits : [];
     const updatedHits = [...oldHits, ...hits];
+
     console.log('hits: ', hits);
     console.log('oldHits: ', oldHits);
     console.log('updated hits: ', updatedHits);
+
     this.setState({
       results: {
         ...results,
         [searchKey]: { hits: updatedHits, page }
       }
     });
-    console.log('this.state.results: ', this.state.results);
   }
 
   componentDidMount() {
+    this._isMounted = true;
     const { searchTerm } = this.state;
     this.setState({ searchKey: searchTerm });
     console.log('did mount');
     this.fetchSearchTopStories(searchTerm);
   }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   render() {
-    const { searchTerm, results, searchKey } = this.state;
+    const { searchTerm, results, searchKey, error } = this.state;
     const page =
       (results && results[searchKey] && results[searchKey].page) || 0;
     const list =
       (results && results[searchKey] && results[searchKey].hits) || [];
-    console.log('list: ', list);
-    console.log('page: ', page);
-
-    //if (!results) return null;
 
     return (
       <div className="page">
@@ -126,7 +134,15 @@ class App extends Component {
             Search{' '}
           </Search>
         </div>
-        <Table list={list} onDismiss={this.onDismiss} />
+
+        {error ? (
+          <div className="interactions">
+            <p>Something went wrong.</p>
+          </div>
+        ) : (
+          <Table list={list} onDismiss={this.onDismiss} />
+        )}
+
         <div className="interactions">
           <Button
             style={{ backgroundColor: '#52c41a', color: 'white' }}
