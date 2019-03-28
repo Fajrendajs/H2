@@ -1,15 +1,18 @@
 import React, { Component } from 'react';
-import './App.css';
-import ToDo from './ToDo';
-import ProfilePage from './ProfilePage';
+import './index.css';
+import ToDo from '../Todo';
+import ProfilePage from '../ProfilePage';
 import { Button } from 'antd';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 
-const DEFAULT_QUERY = 'betting';
-const PATH_BASE = 'https://hn.algolia.com/api/v1';
-const PATH_SEARCH = '/search';
-const PARAM_SEARCH = 'query=';
-const PARAM_PAGE = 'page=';
+import {
+  DEFAULT_QUERY,
+  PATH_BASE,
+  PATH_SEARCH,
+  PARAM_SEARCH,
+  PARAM_PAGE
+} from '../../constants';
 
 class App extends Component {
   _isMounted = false;
@@ -77,7 +80,7 @@ class App extends Component {
     axios(
       `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}`
     )
-      .then(result => this._isMounted && this.setSearchTopStories(result))
+      .then(result => this._isMounted && this.setSearchTopStories(result.data))
       .catch(error => this._isMounted && this.setState({ error }));
   }
 
